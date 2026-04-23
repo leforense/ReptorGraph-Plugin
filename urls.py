@@ -1,0 +1,2 @@
+urlpatterns = []
+websocket_urlpatterns = []

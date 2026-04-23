@@ -1,0 +1,11 @@
+services:
+  app:
+    volumes:
+      # Mounts the entire plugins directory, replacing the container's /app/plugins.
+      # Built-in plugins (cyberchef, graphqlvoyager, checkthehash) must be
+      # copied here from the container first — see CLAUDE.md for the procedure.
+      - ./plugins:/app/plugins
+    environment:
+      # Add reptorgraph to the list of enabled plugins.
+      # Adjust the other plugin names to match what you have in ./plugins/.
+      ENABLED_PLUGINS: "cyberchef,graphqlvoyager,checkthehash,reptorgraph"
