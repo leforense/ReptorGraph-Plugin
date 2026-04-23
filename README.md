@@ -2,7 +2,7 @@
 
 A [SysReptor](https://docs.sysreptor.com) plugin that aggregates findings from all your projects and displays a visual security metrics dashboard — directly inside the SysReptor interface.
 
-<img width="2928" height="3310" alt="reptorgraph-2026-04-23 (3)" src="https://github.com/user-attachments/assets/c8fd1f12-73a6-4a7d-a0b2-3398aa9f6437" />
+<img width="2928" height="2910" alt="reptorgraph-2026-04-23 (4)" src="https://github.com/user-attachments/assets/47e50e3c-6a31-4957-a2e0-a3fc9393ee06" />
 
 
 ## Features
