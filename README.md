@@ -37,7 +37,7 @@ The plugin frontend runs inside a SysReptor iframe (same origin). It fetches all
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ReptorGraph-Plugin.git
+git clone https://github.com/leforense/ReptorGraph-Plugin.git
 cd ReptorGraph-Plugin
 ```
 
