@@ -2,22 +2,23 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Cell, ResponsiveContainer,
 } from 'recharts';
-import type { BySeverity } from '../types';
+import type { BySeverity, SeverityColors } from '../types';
 import type { Lang } from '../i18n';
 import { t } from '../i18n';
 
 interface Props {
   data: BySeverity;
   lang: Lang;
+  colors: SeverityColors;
 }
 
-export default function SeverityChart({ data, lang }: Props) {
+export default function SeverityChart({ data, lang, colors }: Props) {
   const severityConfig = [
-    { key: 'critical' as const, label: t(lang, 'severityCritical'), color: '#dc2626' },
-    { key: 'high'     as const, label: t(lang, 'severityHigh'),     color: '#f97316' },
-    { key: 'medium'   as const, label: t(lang, 'severityMedium'),   color: '#eab308' },
-    { key: 'low'      as const, label: t(lang, 'severityLow'),      color: '#3b82f6' },
-    { key: 'info'     as const, label: t(lang, 'severityInfo'),     color: '#64748b' },
+    { key: 'critical' as const, label: t(lang, 'severityCritical'), color: colors.critical },
+    { key: 'high'     as const, label: t(lang, 'severityHigh'),     color: colors.high },
+    { key: 'medium'   as const, label: t(lang, 'severityMedium'),   color: colors.medium },
+    { key: 'low'      as const, label: t(lang, 'severityLow'),      color: colors.low },
+    { key: 'info'     as const, label: t(lang, 'severityInfo'),     color: colors.info },
   ];
 
   const chartData = severityConfig.map(s => ({

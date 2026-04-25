@@ -84,8 +84,12 @@ export function aggregateData(projects: RawProjectDetail[]): DashboardData {
       const rst = finding.data.retest_status;
       if (rst in byRetestStatus) byRetestStatus[rst]++;
 
-      // Attribute this finding to every pentester on the project
-      for (const name of pentesters) {
+      // Attribute to assignee if set, otherwise fall back to all project members
+      const recipients = finding.assignee ? [finding.assignee.name] : pentesters;
+      for (const name of recipients) {
+        if (!pentesterMap.has(name)) {
+          pentesterMap.set(name, { name, projects: 0, total: 0, critical: 0, high: 0, medium: 0, low: 0, info: 0 });
+        }
         const stat = pentesterMap.get(name)!;
         stat.total++;
         if (SEVERITY_KEYS.includes(sev)) stat[sev]++;

@@ -134,6 +134,39 @@ The Vite proxy injects the Bearer token server-side — it never reaches the bro
 
 ## Customization
 
+### Chart colors
+
+All severity and retest status colors can be overridden via your `app.env` — no rebuild required.
+
+Add any of the following variables (omit those you want to keep at their default):
+
+```env
+# Severity colors
+REPTORGRAPH_COLOR_CRITICAL=#dc2626
+REPTORGRAPH_COLOR_HIGH=#f97316
+REPTORGRAPH_COLOR_MEDIUM=#eab308
+REPTORGRAPH_COLOR_LOW=#3b82f6
+REPTORGRAPH_COLOR_INFO=#64748b
+
+# Retest status colors
+REPTORGRAPH_COLOR_RETEST_NEW=#94a3b8
+REPTORGRAPH_COLOR_RETEST_OPEN=#ef4444
+REPTORGRAPH_COLOR_RETEST_RESOLVED=#22c55e
+REPTORGRAPH_COLOR_RETEST_PARTIAL=#eab308
+REPTORGRAPH_COLOR_RETEST_CHANGED=#f97316
+REPTORGRAPH_COLOR_RETEST_ACCEPTED=#a855f7
+```
+
+After editing `app.env`, restart the container:
+
+```bash
+docker compose restart app
+```
+
+> **How it works:** on startup, `apps.py` reads the env vars and writes a `config.js` file into the collected static directory. The React frontend loads this file before rendering and applies the colors. If no env vars are set, the built-in defaults from `frontend/public/config.js` are used.
+
+---
+
 ### (Attention) Retest status values
 
 The `retest_status` field should reflect your environment in SysReptor; my environment was customized as follows:
@@ -186,7 +219,8 @@ reptorgraph/                  ← Django app (place this inside /app/plugins/)
 │   │   ├── App.tsx           ← state management + layout
 │   │   └── components/
 │   └── public/
-│       └── plugin.js         ← SysReptor route + menu registration
+│       ├── plugin.js         ← SysReptor route + menu registration
+│       └── config.js         ← default colors (overwritten at runtime by app.env)
 └── .env.example              ← dev credentials template
 ```
 

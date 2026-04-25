@@ -1,19 +1,36 @@
+import type { RawProject } from '../types';
 import type { Lang } from '../i18n';
 import { t } from '../i18n';
 
 interface HeaderProps {
-  lastUpdated: Date;
+  lastUpdated: Date | null;
   lang: Lang;
   onLangChange: (lang: Lang) => void;
   onRefresh: () => void;
   onExport: () => void;
+  projects: RawProject[];
+  selectedProjectId: string | null | undefined;
+  onProjectChange: (id: string | null) => void;
 }
 
-export default function Header({ lastUpdated, lang, onLangChange, onRefresh, onExport }: HeaderProps) {
+export default function Header({
+  lastUpdated, lang, onLangChange, onRefresh, onExport,
+  projects, selectedProjectId, onProjectChange,
+}: HeaderProps) {
   const locale = lang === 'pt-BR' ? 'pt-BR' : 'en-US';
 
+  function handleSelect(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value;
+    onProjectChange(val === 'all' ? null : val);
+  }
+
+  const selectValue =
+    selectedProjectId === undefined ? '' :
+    selectedProjectId === null ? 'all' :
+    selectedProjectId;
+
   return (
-    <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+    <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-10 flex-wrap gap-3">
       <div className="flex items-center gap-3">
         <svg
           className="w-8 h-8 text-cyan-500 flex-shrink-0"
@@ -33,7 +50,20 @@ export default function Header({ lastUpdated, lang, onLangChange, onRefresh, onE
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* Project dropdown */}
+        <select
+          value={selectValue}
+          onChange={handleSelect}
+          className="bg-slate-800 border border-slate-700 text-slate-300 text-sm rounded-md px-3 py-1.5 max-w-xs focus:outline-none focus:border-cyan-600"
+        >
+          <option value="" disabled hidden>{t(lang, 'selectProject')}</option>
+          <option value="all">{t(lang, 'filterAllProjects')}</option>
+          {projects.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+
         {/* Language toggle */}
         <div className="flex items-center border border-slate-700 rounded-md overflow-hidden">
           <button
@@ -58,9 +88,11 @@ export default function Header({ lastUpdated, lang, onLangChange, onRefresh, onE
           </button>
         </div>
 
-        <span className="text-slate-500 text-xs hidden md:block">
-          {t(lang, 'lastUpdated')}: {lastUpdated.toLocaleString(locale)}
-        </span>
+        {lastUpdated && (
+          <span className="text-slate-500 text-xs hidden md:block">
+            {t(lang, 'lastUpdated')}: {lastUpdated.toLocaleString(locale)}
+          </span>
+        )}
 
         <button
           onClick={onRefresh}

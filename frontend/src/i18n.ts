@@ -14,6 +14,12 @@ const translations = {
     finalizedProjects: 'Projetos Finalizados',
     totalFindings: 'Total de Findings',
 
+    // Project filter
+    filterAllProjects: 'Todos os Projetos',
+    selectProject: 'Selecione um projeto...',
+    selectToLoad: 'Selecione um projeto para carregar o dashboard',
+    total: 'Total',
+
     // Stat cards — severity
     critical: 'Crítico',
     high: 'Alto',
@@ -86,6 +92,12 @@ const translations = {
     activeProjects: 'Active Projects',
     finalizedProjects: 'Finalized Projects',
     totalFindings: 'Total Findings',
+
+    // Project filter
+    filterAllProjects: 'All Projects',
+    selectProject: 'Select a project...',
+    selectToLoad: 'Select a project to load the dashboard',
+    total: 'Total',
 
     // Stat cards — severity
     critical: 'Critical',

@@ -2,26 +2,27 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, LabelList,
 } from 'recharts';
-import type { ProjectStat } from '../types';
+import type { ProjectStat, SeverityColors } from '../types';
 import type { Lang } from '../i18n';
 import { t } from '../i18n';
 
 interface Props {
   data: ProjectStat[];
   lang: Lang;
+  colors: SeverityColors;
 }
 
 function truncateName(name: string, max = 35): string {
   return name.length > max ? name.slice(0, max - 1) + '…' : name;
 }
 
-export default function TopProjectsChart({ data, lang }: Props) {
+export default function TopProjectsChart({ data, lang, colors }: Props) {
   const severityBars = [
-    { key: 'critical' as const, label: t(lang, 'severityCritical'), color: '#dc2626' },
-    { key: 'high'     as const, label: t(lang, 'severityHigh'),     color: '#f97316' },
-    { key: 'medium'   as const, label: t(lang, 'severityMedium'),   color: '#eab308' },
-    { key: 'low'      as const, label: t(lang, 'severityLow'),      color: '#3b82f6' },
-    { key: 'info'     as const, label: t(lang, 'severityInfo'),     color: '#64748b' },
+    { key: 'critical' as const, label: t(lang, 'severityCritical'), color: colors.critical },
+    { key: 'high'     as const, label: t(lang, 'severityHigh'),     color: colors.high },
+    { key: 'medium'   as const, label: t(lang, 'severityMedium'),   color: colors.medium },
+    { key: 'low'      as const, label: t(lang, 'severityLow'),      color: colors.low },
+    { key: 'info'     as const, label: t(lang, 'severityInfo'),     color: colors.info },
   ];
 
   const chartData = data.map(p => ({ ...p, name: truncateName(p.name) }));

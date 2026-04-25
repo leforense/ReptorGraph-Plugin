@@ -1,4 +1,11 @@
-import type { RawProject, RawProjectDetail } from './types';
+import type { RawProject, RawProjectDetail, ColorConfig } from './types';
+
+
+
+const COLOR_DEFAULTS: ColorConfig = {
+  severity: { critical: '#DC2626', high: '#f97316', medium: '#eab308', low: '#3b82f6', info: '#64748b' },
+  retest:   { new: '#94a3b8', open: '#ef4444', resolved: '#22c55e', partial: '#eab308', changed: '#f97316', accepted: '#a855f7' },
+};
 
 interface ProjectsResponse {
   next: string | null;
@@ -13,6 +20,11 @@ async function apiFetch<T>(url: string): Promise<T> {
   }
   // res.json() returns Promise<any>; cast via unknown to satisfy strict generics
   return res.json() as unknown as T;
+}
+
+export async function fetchPluginConfig(): Promise<ColorConfig> {
+  const win = window as unknown as { REPTORGRAPH_CONFIG?: ColorConfig };
+  return win.REPTORGRAPH_CONFIG ?? COLOR_DEFAULTS;
 }
 
 export async function fetchAllProjects(): Promise<RawProject[]> {

@@ -80,6 +80,28 @@ export interface ProjectStat {
   info: number;
 }
 
+export interface SeverityColors {
+  critical: string;
+  high: string;
+  medium: string;
+  low: string;
+  info: string;
+}
+
+export interface RetestColors {
+  new: string;
+  open: string;
+  resolved: string;
+  partial: string;
+  changed: string;
+  accepted: string;
+}
+
+export interface ColorConfig {
+  severity: SeverityColors;
+  retest: RetestColors;
+}
+
 export interface DashboardData {
   totalProjects: number;
   finalizedProjects: number;
