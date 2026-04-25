@@ -2,8 +2,18 @@
 
 A [SysReptor](https://docs.sysreptor.com) plugin that aggregates findings from all your projects and displays a visual security metrics dashboard — directly inside the SysReptor interface.
 
-<img width="1723" height="1283" alt="image" src="https://github.com/user-attachments/assets/0b6c568e-32eb-4ae8-a220-d835992c648d" />
+**UPDATE:**  Now it doesn't load everything; you need to select whether you want to load everything or each item individually. 
 
+<img width="1464" height="1239" alt="image" src="https://github.com/user-attachments/assets/a7a5d34f-75cf-49d5-80df-e9afd2f48432" />
+
+**All Projects:**
+
+<img width="1458" height="1168" alt="image" src="https://github.com/user-
+attachments/assets/1758fc2f-dc47-41b3-8e2e-987fb99e10b2" />
+
+**Unique Project:**
+
+<img width="1461" height="1119" alt="image" src="https://github.com/user-attachments/assets/d408b22b-fa76-4615-969a-3733cf6d20de" />
 
 
 ## Features
