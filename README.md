@@ -8,8 +8,8 @@ A [SysReptor](https://docs.sysreptor.com) plugin that aggregates findings from a
 
 **All Projects:**
 
-<img width="1458" height="1168" alt="image" src="https://github.com/user-
-attachments/assets/1758fc2f-dc47-41b3-8e2e-987fb99e10b2" />
+<img width="1462" height="1161" alt="image" src="https://github.com/user-attachments/assets/9c93b4a1-8e60-46d6-9cf1-8e3eb7fc33be" />
+
 
 **Unique Project:**
 
