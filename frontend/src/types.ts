@@ -97,9 +97,20 @@ export interface RetestColors {
   accepted: string;
 }
 
+export interface RetestLabels {
+  new?: string;
+  open?: string;
+  resolved?: string;
+  partial?: string;
+  changed?: string;
+  accepted?: string;
+}
+
 export interface ColorConfig {
   severity: SeverityColors;
   retest: RetestColors;
+  defaultLang?: 'pt-BR' | 'en';
+  retestLabels?: RetestLabels;
 }
 
 export interface DashboardData {

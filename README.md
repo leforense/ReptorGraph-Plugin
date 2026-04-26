@@ -144,11 +144,52 @@ The Vite proxy injects the Bearer token server-side — it never reaches the bro
 
 ## Customization
 
+All customization below is done via `app.env` — **no rebuild required**. After any change, restart the container:
+
+```bash
+docker compose restart app
+```
+
+> **How it works:** on startup, `apps.py` reads the env vars and writes a `config.js` file into the collected static directory. The React frontend loads this file before rendering. If no env vars are set, the built-in defaults from `frontend/public/config.js` are used.
+
+---
+
+### Default language
+
+The UI ships with a PT-BR / EN toggle. The default language (shown to users who haven't toggled it yet) is `pt-BR`. To change it:
+
+```env
+REPTORGRAPH_DEFAULT_LANG=en
+```
+
+Accepted values: `pt-BR`, `en`. Any other value falls back to `pt-BR`.
+
+> The user's last-chosen language is saved in their browser's `localStorage` and always takes priority over this setting.
+
+---
+
+### Retest status labels
+
+The six retest status labels shown in the dashboard (stat cards and chart) can be overridden per installation — useful when your team uses different terminology than the defaults.
+
+```env
+REPTORGRAPH_RETEST_LABEL_NEW=Reported
+REPTORGRAPH_RETEST_LABEL_OPEN=Issue Ticket Open
+REPTORGRAPH_RETEST_LABEL_RESOLVED=Fixed
+REPTORGRAPH_RETEST_LABEL_PARTIAL=Partially Remediated
+REPTORGRAPH_RETEST_LABEL_CHANGED=Behavior Changed
+REPTORGRAPH_RETEST_LABEL_ACCEPTED=Risk Accepted
+```
+
+Only set the variables you want to override. Unset ones continue to use the built-in PT-BR / EN translations. Custom labels are language-agnostic — they override both PT-BR and EN simultaneously.
+
+The underlying `retest_status` API values (`new`, `open`, `resolved`, `partial`, `changed`, `accepted`) are fixed by SysReptor and are not configurable.
+
+---
+
 ### Chart colors
 
-All severity and retest status colors can be overridden via your `app.env` — no rebuild required.
-
-Add any of the following variables (omit those you want to keep at their default):
+Severity and retest status colors can be overridden via `app.env`:
 
 ```env
 # Severity colors
@@ -167,37 +208,7 @@ REPTORGRAPH_COLOR_RETEST_CHANGED=#f97316
 REPTORGRAPH_COLOR_RETEST_ACCEPTED=#a855f7
 ```
 
-After editing `app.env`, restart the container:
-
-```bash
-docker compose restart app
-```
-
-> **How it works:** on startup, `apps.py` reads the env vars and writes a `config.js` file into the collected static directory. The React frontend loads this file before rendering and applies the colors. If no env vars are set, the built-in defaults from `frontend/public/config.js` are used.
-
 ---
-
-### (Attention) Retest status values
-
-The `retest_status` field should reflect your environment in SysReptor; my environment was customized as follows:
-
-| Value | Meaning |
-|---|---|
-| `new` | Reported — initial state when the pentest report is delivered |
-| `open` | Not Fixed — submitted for retest but failed |
-| `resolved` | Fixed — remediation confirmed |
-| `partial` | Partially Fixed — partial remediation |
-| `changed` | Behavior Changed — not truly fixed |
-| `accepted` | Risk Accepted — formally approved by management |
-
-These values are hardcoded in the plugin. If your SysReptor instance uses **different or additional statuses**, update the following files after rebuilding:
-
-| File | What to change |
-|---|---|
-| `frontend/src/types.ts` | `RetestStatus` type union |
-| `frontend/src/aggregator.ts` | `ByRetestStatus` object initializer |
-| `frontend/src/i18n.ts` | `retest*` label keys in both `pt-BR` and `en` sections |
-| `frontend/src/components/RetestStatusChart.tsx` | `statusConfig` array |
 
 ### Language / UI text
 

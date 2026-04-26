@@ -26,19 +26,32 @@ class ReptorGraphConfig(PluginConfig):
             'changed':  '#f97316',
             'accepted': '#a855f7',
         }
+        retest_label_keys = ['new', 'open', 'resolved', 'partial', 'changed', 'accepted']
 
-        # Only write config.js if at least one color env var is explicitly set.
-        # Otherwise, leave the file from collectstatic untouched so that colors
-        # edited in frontend/public/config.js (and built into static/) are preserved.
-        all_keys = (
+        # Only write config.js if at least one env var is explicitly set.
+        # Otherwise, leave the file from collectstatic untouched so that defaults
+        # set in frontend/public/config.js (and built into static/) are preserved.
+        all_trigger_keys = (
             [f'REPTORGRAPH_COLOR_{k.upper()}' for k in severity_defaults]
             + [f'REPTORGRAPH_COLOR_RETEST_{k.upper()}' for k in retest_defaults]
+            + [f'REPTORGRAPH_RETEST_LABEL_{k.upper()}' for k in retest_label_keys]
+            + ['REPTORGRAPH_DEFAULT_LANG']
         )
-        if not any(os.environ.get(key) for key in all_keys):
-            log.info('ReptorGraph: no color env vars set — keeping collectstatic config.js')
+        if not any(os.environ.get(key) for key in all_trigger_keys):
+            log.info('ReptorGraph: no env vars set — keeping collectstatic config.js')
             return
 
+        raw_lang = os.environ.get('REPTORGRAPH_DEFAULT_LANG', 'pt-BR')
+        default_lang = raw_lang if raw_lang in ('pt-BR', 'en') else 'pt-BR'
+
+        # Only include labels that are explicitly set — unset ones fall back to i18n in the frontend
+        retest_labels = {
+            k: v for k in retest_label_keys
+            if (v := os.environ.get(f'REPTORGRAPH_RETEST_LABEL_{k.upper()}', ''))
+        }
+
         config = {
+            'defaultLang': default_lang,
             'severity': {
                 k: os.environ.get(f'REPTORGRAPH_COLOR_{k.upper()}', v)
                 for k, v in severity_defaults.items()
@@ -47,6 +60,7 @@ class ReptorGraphConfig(PluginConfig):
                 k: os.environ.get(f'REPTORGRAPH_COLOR_RETEST_{k.upper()}', v)
                 for k, v in retest_defaults.items()
             },
+            'retestLabels': retest_labels,
         }
 
         config_path = os.path.join(

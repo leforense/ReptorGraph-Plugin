@@ -2,7 +2,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Cell, ResponsiveContainer, LabelList,
 } from 'recharts';
-import type { ByRetestStatus, RetestColors } from '../types';
+import type { ByRetestStatus, RetestColors, RetestLabels } from '../types';
 import type { Lang } from '../i18n';
 import { t } from '../i18n';
 
@@ -10,16 +10,17 @@ interface Props {
   data: ByRetestStatus;
   lang: Lang;
   colors: RetestColors;
+  retestLabels?: RetestLabels;
 }
 
-export default function RetestStatusChart({ data, lang, colors }: Props) {
+export default function RetestStatusChart({ data, lang, colors, retestLabels }: Props) {
   const statusConfig = [
-    { key: 'new'      as const, label: t(lang, 'retestNew'),      color: colors.new },
-    { key: 'open'     as const, label: t(lang, 'retestOpen'),     color: colors.open },
-    { key: 'resolved' as const, label: t(lang, 'retestResolved'), color: colors.resolved },
-    { key: 'partial'  as const, label: t(lang, 'retestPartial'),  color: colors.partial },
-    { key: 'changed'  as const, label: t(lang, 'retestChanged'),  color: colors.changed },
-    { key: 'accepted' as const, label: t(lang, 'retestAccepted'), color: colors.accepted },
+    { key: 'new'      as const, label: retestLabels?.new      ?? t(lang, 'retestNew'),      color: colors.new },
+    { key: 'open'     as const, label: retestLabels?.open     ?? t(lang, 'retestOpen'),     color: colors.open },
+    { key: 'resolved' as const, label: retestLabels?.resolved ?? t(lang, 'retestResolved'), color: colors.resolved },
+    { key: 'partial'  as const, label: retestLabels?.partial  ?? t(lang, 'retestPartial'),  color: colors.partial },
+    { key: 'changed'  as const, label: retestLabels?.changed  ?? t(lang, 'retestChanged'),  color: colors.changed },
+    { key: 'accepted' as const, label: retestLabels?.accepted ?? t(lang, 'retestAccepted'), color: colors.accepted },
   ];
 
   const chartData = statusConfig
