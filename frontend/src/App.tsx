@@ -27,7 +27,10 @@ const DEFAULT_COLORS: ColorConfig = {
 
 function getInitialLang(): Lang {
   const saved = localStorage.getItem('reptorgraph-lang');
-  return saved === 'en' || saved === 'pt-BR' ? saved : 'pt-BR';
+  if (saved === 'en' || saved === 'pt-BR') return saved;
+  const cfgLang = (window as unknown as { REPTORGRAPH_CONFIG?: { defaultLang?: string } })
+    .REPTORGRAPH_CONFIG?.defaultLang;
+  return cfgLang === 'en' || cfgLang === 'pt-BR' ? cfgLang : 'pt-BR';
 }
 
 function sortProjects(projects: RawProject[]): RawProject[] {
@@ -106,11 +109,19 @@ export default function App() {
   }
 
   async function handleRefresh() {
-    setSelectedProjectId(undefined);
+    if (state.status === 'loading-details') return;
+    const prevSelection = selectedProjectId;
     setState({ status: 'loading-list' });
     try {
       const projects = sortProjects(await fetchAllProjects());
-      setState({ status: 'idle', projects });
+      if (prevSelection === null) {
+        await loadAllDetails(projects);
+      } else if (typeof prevSelection === 'string') {
+        await loadSingleProject(prevSelection, projects);
+      } else {
+        setSelectedProjectId(undefined);
+        setState({ status: 'idle', projects });
+      }
     } catch (err) {
       setState({ status: 'error', message: err instanceof Error ? err.message : 'Unknown error' });
     }
@@ -205,18 +216,18 @@ export default function App() {
 
           {/* Retest breakdown */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <StatCard label={t(lang, 'reported')}    value={dashboardData.byRetestStatus.new}      sublabel={t(lang, 'reportedSub')} />
-            <StatCard label={t(lang, 'fixed')}       value={dashboardData.byRetestStatus.resolved} sublabel={t(lang, 'fixedSub')}    color={colors.retest.resolved} />
-            <StatCard label={t(lang, 'notFixed')}    value={dashboardData.byRetestStatus.open}     sublabel={t(lang, 'notFixedSub')} color={colors.retest.open} />
-            <StatCard label={t(lang, 'partialFixed')} value={dashboardData.byRetestStatus.partial} sublabel={t(lang, 'partialFixedSub')} color={colors.retest.partial} />
-            <StatCard label={t(lang, 'changed')}     value={dashboardData.byRetestStatus.changed}  sublabel={t(lang, 'changedSub')}  color={colors.retest.changed} />
-            <StatCard label={t(lang, 'riskAccepted')} value={dashboardData.byRetestStatus.accepted} sublabel={t(lang, 'riskAcceptedSub')} color={colors.retest.accepted} />
+            <StatCard label={colors.retestLabels?.new      ?? t(lang, 'reported')}     value={dashboardData.byRetestStatus.new}      sublabel={t(lang, 'reportedSub')} />
+            <StatCard label={colors.retestLabels?.resolved ?? t(lang, 'fixed')}        value={dashboardData.byRetestStatus.resolved}  sublabel={t(lang, 'fixedSub')}    color={colors.retest.resolved} />
+            <StatCard label={colors.retestLabels?.open     ?? t(lang, 'notFixed')}     value={dashboardData.byRetestStatus.open}      sublabel={t(lang, 'notFixedSub')} color={colors.retest.open} />
+            <StatCard label={colors.retestLabels?.partial  ?? t(lang, 'partialFixed')} value={dashboardData.byRetestStatus.partial}   sublabel={t(lang, 'partialFixedSub')} color={colors.retest.partial} />
+            <StatCard label={colors.retestLabels?.changed  ?? t(lang, 'changed')}      value={dashboardData.byRetestStatus.changed}   sublabel={t(lang, 'changedSub')}  color={colors.retest.changed} />
+            <StatCard label={colors.retestLabels?.accepted ?? t(lang, 'riskAccepted')} value={dashboardData.byRetestStatus.accepted}  sublabel={t(lang, 'riskAcceptedSub')} color={colors.retest.accepted} />
           </div>
 
           {/* Charts row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
             <SeverityChart data={dashboardData.bySeverity} lang={lang} colors={colors.severity} />
-            <RetestStatusChart data={dashboardData.byRetestStatus} lang={lang} colors={colors.retest} />
+            <RetestStatusChart data={dashboardData.byRetestStatus} lang={lang} colors={colors.retest} retestLabels={colors.retestLabels} />
           </div>
 
           {/* Pentester breakdown */}
