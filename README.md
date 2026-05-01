@@ -16,6 +16,18 @@ A [SysReptor](https://docs.sysreptor.com) plugin that aggregates findings from a
 <img width="1461" height="1119" alt="image" src="https://github.com/user-attachments/assets/d408b22b-fa76-4615-969a-3733cf6d20de" />
 
 
+## Update 01/05/2025
+**New Lifecycle**
+<img width="1411" height="376" alt="image" src="https://github.com/user-attachments/assets/9d15b42c-1f00-4bba-b866-0a03901deb25" />
+
+Read here: https://github.com/leforense/ReptorGraph-Plugin/edit/main/README.md#vulnerability-lifecycle-fields
+
+**New Projects Finds**
+<img width="1421" height="578" alt="image" src="https://github.com/user-attachments/assets/b72038da-404b-432e-82b8-86ba7b2ee119" />
+
+
+
+
 ## Features
 
 - **Overview cards** — total projects, active vs finalized, total findings
