@@ -47,6 +47,11 @@ const translations = {
     chartPentesterTitle: 'Findings por Pentester',
     chartPentesterNote: 'Baseado em participação no projeto — todos os pentesters recebem os findings do projeto',
     chartTopProjectsTitle: 'Top Projetos Ativos por Número de Findings',
+    chartFindingsListTitle: 'Findings do Projeto',
+    chartLifecycleTitle: 'Vida Útil das Vulnerabilidades',
+    avgResolutionDays: 'Tempo Médio de Resolução',
+    avgResolutionSub: 'dias (findings resolvidos)',
+    noLifecycleData: 'Sem data de início (campo não encontrado nas seções)',
 
     // Chart — severity labels
     severityCritical: 'Crítico',
@@ -126,6 +131,11 @@ const translations = {
     chartPentesterTitle: 'Findings by Pentester',
     chartPentesterNote: "Based on project membership — all project pentesters receive the project's findings",
     chartTopProjectsTitle: 'Top Active Projects by Finding Count',
+    chartFindingsListTitle: 'Project Findings',
+    chartLifecycleTitle: 'Vulnerability Lifecycle',
+    avgResolutionDays: 'Avg. Resolution Time',
+    avgResolutionSub: 'days (resolved findings)',
+    noLifecycleData: 'No start date (field not found in sections)',
 
     // Chart — severity labels
     severityCritical: 'Critical',

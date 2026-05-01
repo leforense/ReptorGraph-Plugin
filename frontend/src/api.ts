@@ -1,6 +1,11 @@
-import type { RawProject, RawProjectDetail, ColorConfig } from './types';
+import type { RawProject, RawProjectDetail, ColorConfig, LifecycleConfig } from './types';
 
-
+export const DEFAULT_LIFECYCLE_CONFIG: LifecycleConfig = {
+  startField: 'start_date',
+  retestDateField: 'date_retest',
+  retestStatusField: 'retest_status',
+  resolvedValue: 'resolved',
+};
 
 const COLOR_DEFAULTS: ColorConfig = {
   severity: { critical: '#DC2626', high: '#f97316', medium: '#eab308', low: '#3b82f6', info: '#64748b' },
@@ -18,13 +23,16 @@ async function apiFetch<T>(url: string): Promise<T> {
   if (!res.ok) {
     throw new Error(`API ${res.status} ${res.statusText} — ${url}`);
   }
-  // res.json() returns Promise<any>; cast via unknown to satisfy strict generics
   return res.json() as unknown as T;
 }
 
 export async function fetchPluginConfig(): Promise<ColorConfig> {
   const win = window as unknown as { REPTORGRAPH_CONFIG?: ColorConfig };
-  return win.REPTORGRAPH_CONFIG ?? COLOR_DEFAULTS;
+  const cfg = win.REPTORGRAPH_CONFIG ?? COLOR_DEFAULTS;
+  return {
+    ...cfg,
+    lifecycle: { ...DEFAULT_LIFECYCLE_CONFIG, ...(cfg.lifecycle ?? {}) },
+  };
 }
 
 export async function fetchAllProjects(): Promise<RawProject[]> {

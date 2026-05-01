@@ -1,9 +1,9 @@
 import { useMemo, useEffect, useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
-import type { ColorConfig, RawProject, RawProjectDetail } from './types';
+import type { ColorConfig, LifecycleConfig, RawProject, RawProjectDetail } from './types';
 import type { Lang } from './i18n';
 import { t } from './i18n';
-import { fetchAllProjects, fetchAllProjectDetails, fetchPluginConfig } from './api';
+import { fetchAllProjects, fetchAllProjectDetails, fetchPluginConfig, DEFAULT_LIFECYCLE_CONFIG } from './api';
 import { aggregateData } from './aggregator';
 import Header from './components/Header';
 import StatCard from './components/StatCard';
@@ -11,6 +11,8 @@ import SeverityChart from './components/SeverityChart';
 import RetestStatusChart from './components/RetestStatusChart';
 import PentesterChart from './components/PentesterChart';
 import TopProjectsChart from './components/TopProjectsChart';
+import FindingListChart from './components/FindingListChart';
+import LifecycleChart from './components/LifecycleChart';
 import { LoadingState, ErrorState } from './components/LoadingState';
 
 type AppState =
@@ -35,6 +37,10 @@ function getInitialLang(): Lang {
 
 function sortProjects(projects: RawProject[]): RawProject[] {
   return [...projects].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function resolvedLifecycle(colors: ColorConfig): LifecycleConfig {
+  return { ...DEFAULT_LIFECYCLE_CONFIG, ...(colors.lifecycle ?? {}) };
 }
 
 export default function App() {
@@ -132,8 +138,8 @@ export default function App() {
     const details = (typeof selectedProjectId === 'string' && state.scope === 'all')
       ? state.allDetails.filter(p => p.id === selectedProjectId)
       : state.allDetails;
-    return aggregateData(details);
-  }, [state, selectedProjectId]);
+    return aggregateData(details, resolvedLifecycle(colors));
+  }, [state, selectedProjectId, colors]);
 
   async function handleExport() {
     if (!dashboardRef.current) return;
@@ -238,6 +244,52 @@ export default function App() {
           {/* Top projects — hidden in single project mode */}
           {!isSingleProject && dashboardData.topProjects.length > 0 && (
             <TopProjectsChart data={dashboardData.topProjects} lang={lang} colors={colors.severity} />
+          )}
+
+          {/* Single project extras */}
+          {isSingleProject && (
+            <>
+              {/* Finding list chart */}
+              {dashboardData.findingsList.length > 0 && (
+                <FindingListChart
+                  data={dashboardData.findingsList}
+                  lang={lang}
+                  colors={colors.severity}
+                />
+              )}
+
+              {/* Lifecycle chart + avg resolution card */}
+              {dashboardData.findingsLifecycle.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-5 items-start">
+                  <div className="lg:col-span-3">
+                    <LifecycleChart
+                      data={dashboardData.findingsLifecycle}
+                      lang={lang}
+                      colors={colors.severity}
+                    />
+                  </div>
+                  <div>
+                    {dashboardData.avgResolutionDays !== null ? (
+                      <StatCard
+                        label={t(lang, 'avgResolutionDays')}
+                        value={dashboardData.avgResolutionDays}
+                        sublabel={t(lang, 'avgResolutionSub')}
+                        color={colors.retest.resolved}
+                      />
+                    ) : (
+                      <div className="bg-slate-900 rounded-lg border border-slate-800 p-4 h-full flex items-center justify-center">
+                        <p className="text-slate-600 text-xs text-center">{t(lang, 'noRetestData')}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* No lifecycle data fallback */}
+              {dashboardData.findingsLifecycle.length === 0 && (
+                <LifecycleChart data={[]} lang={lang} colors={colors.severity} />
+              )}
+            </>
           )}
 
           <p className="text-center text-slate-700 text-xs pb-2">

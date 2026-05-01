@@ -28,6 +28,15 @@ class ReptorGraphConfig(PluginConfig):
         }
         retest_label_keys = ['new', 'open', 'resolved', 'partial', 'changed', 'accepted']
 
+        # Lifecycle field config — allows community customization for different SysReptor templates.
+        # These control which section/finding fields the frontend reads for the lifecycle chart.
+        lifecycle_env_keys = {
+            'startField':        'REPTORGRAPH_LIFECYCLE_START_FIELD',
+            'retestDateField':   'REPTORGRAPH_LIFECYCLE_RETEST_DATE_FIELD',
+            'retestStatusField': 'REPTORGRAPH_LIFECYCLE_RETEST_STATUS_FIELD',
+            'resolvedValue':     'REPTORGRAPH_LIFECYCLE_RESOLVED_VALUE',
+        }
+
         # Only write config.js if at least one env var is explicitly set.
         # Otherwise, leave the file from collectstatic untouched so that defaults
         # set in frontend/public/config.js (and built into static/) are preserved.
@@ -36,6 +45,7 @@ class ReptorGraphConfig(PluginConfig):
             + [f'REPTORGRAPH_COLOR_RETEST_{k.upper()}' for k in retest_defaults]
             + [f'REPTORGRAPH_RETEST_LABEL_{k.upper()}' for k in retest_label_keys]
             + ['REPTORGRAPH_DEFAULT_LANG']
+            + list(lifecycle_env_keys.values())
         )
         if not any(os.environ.get(key) for key in all_trigger_keys):
             log.info('ReptorGraph: no env vars set — keeping collectstatic config.js')
@@ -50,6 +60,12 @@ class ReptorGraphConfig(PluginConfig):
             if (v := os.environ.get(f'REPTORGRAPH_RETEST_LABEL_{k.upper()}', ''))
         }
 
+        # Only include lifecycle overrides that are explicitly set
+        lifecycle_overrides = {
+            k: v for k, env_key in lifecycle_env_keys.items()
+            if (v := os.environ.get(env_key, ''))
+        }
+
         config = {
             'defaultLang': default_lang,
             'severity': {
@@ -61,6 +77,7 @@ class ReptorGraphConfig(PluginConfig):
                 for k, v in retest_defaults.items()
             },
             'retestLabels': retest_labels,
+            'lifecycle': lifecycle_overrides if lifecycle_overrides else {},
         }
 
         config_path = os.path.join(

@@ -25,7 +25,13 @@ export interface RawFinding {
     severity: Severity;
     retest_status: RetestStatus;
     date_retest: string | null;
+    [key: string]: unknown;
   };
+}
+
+export interface RawSection {
+  id: string;
+  data: Record<string, unknown>;
 }
 
 export interface RawProject {
@@ -40,6 +46,7 @@ export interface RawProject {
 
 export interface RawProjectDetail extends RawProject {
   findings: RawFinding[];
+  sections?: RawSection[];
 }
 
 export interface BySeverity {
@@ -80,6 +87,20 @@ export interface ProjectStat {
   info: number;
 }
 
+export interface FindingListStat {
+  id: string;
+  title: string;
+  severity: Severity;
+}
+
+export interface FindingLifecycleStat {
+  id: string;
+  title: string;
+  severity: Severity;
+  startDate: Date;
+  endDate: Date | null;
+}
+
 export interface SeverityColors {
   critical: string;
   high: string;
@@ -106,11 +127,19 @@ export interface RetestLabels {
   accepted?: string;
 }
 
+export interface LifecycleConfig {
+  startField: string;
+  retestDateField: string;
+  retestStatusField: string;
+  resolvedValue: string;
+}
+
 export interface ColorConfig {
   severity: SeverityColors;
   retest: RetestColors;
   defaultLang?: 'pt-BR' | 'en';
   retestLabels?: RetestLabels;
+  lifecycle?: Partial<LifecycleConfig>;
 }
 
 export interface DashboardData {
@@ -122,5 +151,8 @@ export interface DashboardData {
   byRetestStatus: ByRetestStatus;
   byPentester: PentesterStat[];
   topProjects: ProjectStat[];
+  findingsList: FindingListStat[];
+  findingsLifecycle: FindingLifecycleStat[];
+  avgResolutionDays: number | null;
   lastUpdated: Date;
 }

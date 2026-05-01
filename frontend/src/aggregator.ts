@@ -8,7 +8,11 @@ import type {
   ProjectStat,
   DashboardData,
   Severity,
+  FindingListStat,
+  FindingLifecycleStat,
+  LifecycleConfig,
 } from './types';
+import { DEFAULT_LIFECYCLE_CONFIG } from './api';
 
 function mergePentesters(
   members: RawMember[],
@@ -29,7 +33,30 @@ function mergePentesters(
 
 const SEVERITY_KEYS: Severity[] = ['critical', 'high', 'medium', 'low', 'info'];
 
-export function aggregateData(projects: RawProjectDetail[]): DashboardData {
+const SEVERITY_WEIGHT: Record<Severity, number> = {
+  critical: 5, high: 4, medium: 3, low: 2, info: 1,
+};
+
+function parseLocalDate(dateStr: string): Date {
+  // Parse YYYY-MM-DD as local noon to avoid timezone-induced day shifts
+  return new Date(dateStr + 'T12:00:00');
+}
+
+function extractStartDate(project: RawProjectDetail, config: LifecycleConfig): Date | null {
+  for (const section of project.sections ?? []) {
+    const val = section.data[config.startField];
+    if (typeof val === 'string' && val) {
+      const d = parseLocalDate(val);
+      if (!isNaN(d.getTime())) return d;
+    }
+  }
+  return null;
+}
+
+export function aggregateData(
+  projects: RawProjectDetail[],
+  lifecycleConfig: LifecycleConfig = DEFAULT_LIFECYCLE_CONFIG,
+): DashboardData {
   const bySeverity: BySeverity = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
   const byRetestStatus: ByRetestStatus = {
     new: 0, open: 0, resolved: 0, partial: 0, changed: 0, accepted: 0,
@@ -41,6 +68,13 @@ export function aggregateData(projects: RawProjectDetail[]): DashboardData {
   const pentesterMap = new Map<string, PentesterStat>();
   const activeProjectStats: ProjectStat[] = [];
   let totalFindings = 0;
+
+  // Per-finding data only computed for single-project view (too large otherwise)
+  const findingsList: FindingListStat[] = [];
+  const findingsLifecycle: FindingLifecycleStat[] = [];
+  let avgResolutionDays: number | null = null;
+
+  const isSingleProject = projects.length === 1;
 
   for (const project of projects) {
     const pentesters = mergePentesters(project.members, project.imported_members);
@@ -75,6 +109,9 @@ export function aggregateData(projects: RawProjectDetail[]): DashboardData {
       pentesterMap.get(name)!.projects++;
     }
 
+    // Extract project start date for lifecycle (from sections)
+    const startDate = isSingleProject ? extractStartDate(project, lifecycleConfig) : null;
+
     for (const finding of project.findings) {
       totalFindings++;
 
@@ -94,7 +131,44 @@ export function aggregateData(projects: RawProjectDetail[]): DashboardData {
         stat.total++;
         if (SEVERITY_KEYS.includes(sev)) stat[sev]++;
       }
+
+      if (isSingleProject) {
+        findingsList.push({ id: finding.id, title: finding.data.title, severity: sev });
+
+        if (startDate) {
+          // Read retest fields dynamically (field names are configurable)
+          const retestDate = finding.data[lifecycleConfig.retestDateField];
+          const retestStatus = finding.data[lifecycleConfig.retestStatusField];
+          const isResolved =
+            typeof retestStatus === 'string' &&
+            retestStatus === lifecycleConfig.resolvedValue;
+          const endDate =
+            isResolved && typeof retestDate === 'string' && retestDate
+              ? parseLocalDate(retestDate)
+              : null;
+
+          findingsLifecycle.push({
+            id: finding.id,
+            title: finding.data.title,
+            severity: sev,
+            startDate,
+            endDate,
+          });
+        }
+      }
     }
+  }
+
+  // Sort findings list by severity weight (critical first)
+  findingsList.sort((a, b) => SEVERITY_WEIGHT[b.severity] - SEVERITY_WEIGHT[a.severity]);
+
+  // Average resolution time: mean of (endDate - startDate) in days for resolved findings
+  const resolvedFindings = findingsLifecycle.filter(f => f.endDate !== null);
+  if (resolvedFindings.length > 0) {
+    const totalDays = resolvedFindings.reduce((sum, f) => {
+      return sum + (f.endDate!.getTime() - f.startDate.getTime()) / (1000 * 60 * 60 * 24);
+    }, 0);
+    avgResolutionDays = Math.round(totalDays / resolvedFindings.length);
   }
 
   return {
@@ -106,6 +180,9 @@ export function aggregateData(projects: RawProjectDetail[]): DashboardData {
     byRetestStatus,
     byPentester: [...pentesterMap.values()].sort((a, b) => b.total - a.total),
     topProjects: activeProjectStats.sort((a, b) => b.total - a.total).slice(0, 10),
+    findingsList,
+    findingsLifecycle,
+    avgResolutionDays,
     lastUpdated: new Date(),
   };
 }

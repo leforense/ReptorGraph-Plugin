@@ -23,6 +23,9 @@ A [SysReptor](https://docs.sysreptor.com) plugin that aggregates findings from a
 - **Retest status breakdown** — Reported, Fixed, Not Fixed, Partial, Changed, Risk Accepted
 - **Findings by pentester** — stacked by severity, based on project membership
 - **Top active projects** — stacked by severity, top 10
+- **Findings list** *(single project)* — horizontal bar chart, each finding by title and severity
+- **Vulnerability lifecycle** *(single project)* — stacked area chart showing active findings day-by-day, from pentest start to last remediation
+- **Avg. resolution time card** *(single project)* — mean days from pentest start to retest confirmation, for resolved findings
 - **Export PNG** — one-click dashboard screenshot
 - **Bilingual UI** — PT-BR / EN toggle, preference saved per browser
 
@@ -184,6 +187,32 @@ REPTORGRAPH_RETEST_LABEL_ACCEPTED=Risk Accepted
 Only set the variables you want to override. Unset ones continue to use the built-in PT-BR / EN translations. Custom labels are language-agnostic — they override both PT-BR and EN simultaneously.
 
 The underlying `retest_status` API values (`new`, `open`, `resolved`, `partial`, `changed`, `accepted`) are fixed by SysReptor and are not configurable.
+
+---
+
+### Vulnerability lifecycle fields
+
+The lifecycle chart reads two dates to compute each finding's active period:
+
+| Concept | Default field | Where it lives |
+|---|---|---|
+| Pentest start date | `start_date` | Any project section's `data` object |
+| Resolution date | `date_retest` | `finding.data` |
+| Resolution status field | `retest_status` | `finding.data` |
+| Value that means "resolved" | `resolved` | `finding.data[retestStatusField]` |
+
+If your SysReptor report template uses different field names, override them:
+
+```env
+REPTORGRAPH_LIFECYCLE_START_FIELD=start_date
+REPTORGRAPH_LIFECYCLE_RETEST_DATE_FIELD=date_retest
+REPTORGRAPH_LIFECYCLE_RETEST_STATUS_FIELD=retest_status
+REPTORGRAPH_LIFECYCLE_RESOLVED_VALUE=resolved
+```
+
+Only set the variables you need to override — unset ones use the defaults above.
+
+> **How the chart reads `start_date`:** the plugin searches all sections of the project (e.g. `target_details`, `other`, etc.) and uses the first section whose `data` object contains the configured field. If no section has it, the lifecycle chart shows a "no data" placeholder.
 
 ---
 
